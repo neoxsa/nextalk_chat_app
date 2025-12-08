@@ -52,7 +52,7 @@ function SideBar({ logout }) {
                         <Settings className={svgStyle} /> </button>
                     <button
                         className={liStyle}
-                        onClick={() => { logout }}
+                        onClick={() => {logout()}}
                     >
                         <LogOut className="w-6 h-6 stroke-red-500" />
                     </button>
@@ -64,7 +64,7 @@ function SideBar({ logout }) {
                 id="menu-tooltip"
                 place="right"
                 delayShow={1000}
-                className="!py-1 !px-3 !w-fit !text-center !text-xs !rounded-md !bg-blue-200 !text-blue-900 !shadow-2xl"
+                className="py-1 px-3 w-fit text-center text-xs rounded-md bg-blue-200 text-blue-900 shadow-2xl"
             />
         </>
     )
