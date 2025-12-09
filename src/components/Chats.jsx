@@ -3,13 +3,21 @@ import { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setMessage } from '../features/messageSlice';
 import { supabase } from '../supabase/supabaseClient'
+import { Toaster, toast } from 'sonner';
+
 
 
 function Chats() {
 
     const [newMessage, setNewMessage] = useState('')
     const [usersOnline, setUsersOnline] = useState([])
+    // const [isTyping, setIsTyping] = useState(false)
+    const [error, setError] = useState(false)
+
     const channelRef = useRef(null);
+
+    const chatContainerRef = useRef(null);
+    const scroll = useRef()
 
     const session = useSelector((state) => state.session.session);
     const allMessages = useSelector((state) => state.messages.messages);
@@ -17,14 +25,20 @@ function Chats() {
 
     const dispatch = useDispatch();
 
-    console.log("new session", session)
+    console.log("new session", session);
 
-    let time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-
+    //Auto scroll down
+    useEffect(() => {
+        setTimeout(() => {
+            if (chatContainerRef.current) {
+                chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+            }
+        }, [100]);
+    }, [allMessages])
 
     //Supabase Message Channel
     useEffect(() => {
+
         if (!session) {
             setUsersOnline([]);
             return;
@@ -44,7 +58,7 @@ function Chats() {
             dispatch(
                 setMessage({
                     id: payload.payload.id,
-                    timestamp: payload.payload.time,
+                    timestamp: payload.payload.timestamp,
                     name: payload.payload.name,
                     chat: payload.payload.chat,
                     avatar: payload.payload.avatar
@@ -52,22 +66,26 @@ function Chats() {
             );
         });
 
+        // handle user presence - MUST be before subscribe
+        roomOne.on('presence', { event: 'sync' }, () => {
+            const state = roomOne.presenceState();
+            console.log('Presence state:', state);
+            setUsersOnline(Object.keys(state));
+        });
+
         // track user presence subscribe
         roomOne.subscribe(async (status) => {
+            console.log('Subscription status:', status);
             if (status === 'SUBSCRIBED') {
-                await roomOne.track({
+                const trackStatus = await roomOne.track({
                     online_at: new Date().toISOString(),
-                    id: session?.user?.id
+                    user_id: session?.user?.id,
+                    name: session?.user?.user_metadata?.full_name
                 });
+                console.log('Track status:', trackStatus);
             }
-        })
-
-        // handle user presence
-        roomOne.on('presence', { event: 'async' }, () => {
-            const state = roomOne.presenceState();
-            setUsersOnline(Object.keys(state));
-            console.log('Users online:', Object.keys(state));
         });
+
 
         // unsubscribe from roomOne
         return () => {
@@ -79,29 +97,39 @@ function Chats() {
     // send message
     const sendMessage = async (e) => {
         e.preventDefault();
+        let time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-        const messageData = {
-            id: session?.user?.id,
-            timestamp: time,
-            name: session?.user?.user_metadata.full_name,
-            chat: newMessage,
-            avatar: session?.user?.user_metadata.avatar_url,
-        };
 
-        // Dispatch locally (broadcasts don't echo back to sender)
-        dispatch(setMessage(messageData));
+        if (!newMessage) {
+            setError(true);
+            console.log("Error: Message is empty");
+        
+            toast.info('Message is empty')
 
-        // Send to other users
-        channelRef.current?.send({
-            type: 'broadcast',
-            event: 'message',
-            payload: messageData
-        });
+        } else {
+            const messageData = {
+                id: session?.user?.id,
+                timestamp: time,
+                name: session?.user?.user_metadata.full_name,
+                chat: newMessage,
+                avatar: session?.user?.user_metadata.avatar_url,
+            };
 
-        setNewMessage('');
+            // Dispatch locally (broadcasts don't echo back to sender)
+            dispatch(setMessage(messageData));
+
+            // Send to other users
+            channelRef.current?.send({
+                type: 'broadcast',
+                event: 'message',
+                payload: messageData
+            });
+
+            setNewMessage('');
+        }
     };
 
-    console.log("All Message", allMessages);
+    // console.log("All Message", allMessages);
 
 
     return (
@@ -123,9 +151,9 @@ function Chats() {
                                 <h1 className='text-2xl font-semibold'>{session?.user?.user_metadata.full_name}</h1>
                                 {
                                     session ? (
-                                        <span className='text-green-400'>Online</span>
+                                        <span className='text-green-400'>Online  {usersOnline.length}</span>
                                     ) : (
-                                        <span className='text-red-400'>Offline</span>
+                                        <span className='text-red-400'>Offline  {usersOnline.length}</span>
                                     )
                                 }
 
@@ -148,27 +176,30 @@ function Chats() {
                     </div>
 
                     {/* Chat Area */}
-                    <div className='relative flex flex-col gap-6 h-full border-2 border-[#363636] rounded-xl p-6 overflow-y-auto'>
+                    <div ref={chatContainerRef} className='relative flex flex-col gap-6 h-full border-2 border-[#363636] rounded-xl p-6 overflow-y-auto'>
                         {/* Messages Area*/}
 
-                        {allMessages.map((msg, index) => (
-                            <div key={index} className={`${msg.id === session?.user?.id ? 'justify-end' : 'justify-start'} relative flex items-center gap-4`}>
-                                {
-                                    msg.id !== session?.user?.id && (
-                                        <div className='relative rounded-2xl bg-blue-500 size-10 flex justify-center items-center'>
-                                            <img
-                                                src={msg.avatar} alt="profile"
-                                                className='rounded-xl w-10 h-10'
-                                            />
-                                        </div>
-                                    )
-                                }
-                                <div className=' flex gap-2'>
+                        {allMessages.map((msg) => (
+                            <div key={msg.id} className={`${msg.id === session?.user?.id ? 'justify-end' : 'justify-start'} relative flex items-center gap-4`}>
 
-                                    <div className={`${msg.id === session?.user?.id ? 'rounded-tl-2xl' : 'rounded-tr-2xl'} relative bg-[#2b353e] p-4 w-max max-w-xs rounded-br-2xl rounded-bl-2xl`}>
-                                        <p className="text-amber-50">{msg.chat}</p>
+                                <div className=' flex gap-2'>
+                                    {
+                                        msg.id !== session?.user?.id && (
+                                            <div className='relative rounded-2xl bg-blue-500 size-10 flex justify-center items-center'>
+                                                <img
+                                                    src={msg.avatar} alt="profile"
+                                                    className='rounded-xl w-10 h-10'
+                                                />
+                                            </div>
+                                        )
+                                    }
+
+                                    <div className={`${msg.id === session?.user?.id ? 'rounded-tl-2xl bg-[#2b353e]' : 'rounded-tr-2xl bg-blue-400'} relative  p-4 w-auto rounded-br-2xl rounded-bl-2xl`}>
+
+                                        <p className="text-amber-50 text-wrap">{msg.chat}</p>
                                     </div>
                                     <span className='flex items-end text-gray-400 text-xs'>{msg.timestamp}</span>
+
                                 </div>
 
                             </div>
@@ -189,10 +220,15 @@ function Chats() {
                         />
                         <button
                             type='submit'
-                            className='bg-blue-500 px-4 py-2 rounded-lg text-amber-50 cursor-pointer font-medium'
+                            className={`bg-blue-500 px-4 py-2 rounded-lg text-amber-50 cursor-pointer font-medium`}
                         >
                             <Send />
                         </button>
+                        <span ref={scroll}></span>
+                        <Toaster 
+                            position="top-center"
+                            theme='dark'
+                        />
                     </form>
                 </div>
 

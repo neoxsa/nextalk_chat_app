@@ -1,18 +1,16 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { supabase } from "./supabase/supabaseClient";
-import SideBar from "./components/SideBar";
-import AllChats from "./components/AllChats";
-import Chats from "./components/Chats";
-import Login from "./pages/Login";
+import { SideBar} from "./components/index.js";
+import {Login} from "./pages/index.js"
 import { useDispatch, useSelector } from "react-redux";
 import { setSession } from "./features/sessionSlice";
+import { Outlet } from "react-router-dom";
 
 
 export default function App() {
-    
-    const dispatch = useDispatch();
-    const currenSession = useSelector((state) => state.session.session);
 
+    const dispatch = useDispatch();
+    const currentSession = useSelector((state) => state.session.session);
 
     useEffect(() => {
         // Check for existing session
@@ -28,35 +26,28 @@ export default function App() {
         });
 
         return () => subscription.unsubscribe();
-    }, []);
+    }, [dispatch]);
 
     // login handler
     const login = async () => {
         await supabase.auth.signInWithOAuth({
             provider: 'google',
-        })
+        });
     }
 
     // logout handler
     const logout = async () => {
         const { error } = await supabase.auth.signOut();
-        {
-            error && <div className="text-red-500">
-                {error.message}
-            </div>
-        }
     }
 
     return (
         <>
-            {!currenSession ? (
-                <Login login={login} session={currenSession} />
+            {!currentSession ? (
+                <Login login={login} session={currentSession} />
             ) : (
                 <section className="flex  h-screen w-auto shadow-xl shadow-left shadow-blue-900/70">
                     <SideBar logout={logout} />
-                    <AllChats />
-                    <Chats />
-
+                    <Outlet />
                 </section>
             )}
         </>

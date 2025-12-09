@@ -1,9 +1,10 @@
 import SideBar from "./SideBar";
-import AllChats from "./AllChats";
+import ChatsList from "./ChatsList";
 import Chats from "./Chats"
-
+import LoginForm from "./LoginForm";
 export {
     SideBar,
-    AllChats,
-    Chats
+    ChatsList,
+    Chats,
+    LoginForm
 }

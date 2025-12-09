@@ -1,7 +1,7 @@
 import { Search } from 'lucide-react'
 import React from 'react'
 
-function AllChats() {
+function ChatsList() {
     return (
         <>
             <section className='text-amber-50 bg-black border-r-3 border-[#363636] h-screen'>
@@ -88,4 +88,4 @@ function AllChats() {
     )
 }
 
-export default AllChats
+export default ChatsList
