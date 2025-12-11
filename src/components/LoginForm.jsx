@@ -1,16 +1,8 @@
-import { useDispatch } from "react-redux";
-import {setSession} from "../features/sessionSlice.js";
+
 
 function LoginForm({
     login,
-    session
 }) {
-
-    const dispatch = useDispatch();
-
-    const setSessionHandler = async() => {
-        dispatch(setSession(session));
-    }
 
     return (
             <div className="bg-gray-800 p-7 rounded-lg shadow-lg shadow-blue-900 justify-center items-center flex flex-col">
@@ -46,7 +38,9 @@ function LoginForm({
                 <h2 className="text-xl">or</h2>
 
                 <button
-                    onClick={() => { login(); setSessionHandler() }}
+                    onClick={() => { login(); 
+                        // setSessionHandler() 
+                    }}
                     type='button'
                     className='bg-gray-900 px-4 py-2 rounded-lg text-amber-50 cursor-pointer font-medium flex items-center mt-4 px-auto'
                 >

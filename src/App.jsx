@@ -43,9 +43,9 @@ export default function App() {
     return (
         <>
             {!currentSession ? (
-                <Login login={login} session={currentSession} />
+                <Login login={login} />
             ) : (
-                <section className="flex  h-screen w-auto shadow-xl shadow-left shadow-blue-900/70">
+                <section className="flex h-screen w-auto shadow-xl shadow-left shadow-blue-900/70">
                     <SideBar logout={logout} />
                     <Outlet />
                 </section>
