@@ -1,69 +1,45 @@
 import { Bell, Bird, Contact, Info, LogOut, MessageCircle, Phone, Settings } from 'lucide-react'
 import { Tooltip } from 'react-tooltip';
 import {NavLink, useNavigate} from 'react-router-dom'
+import { NavItems, svgStyle } from '../constants/constants.jsx';
+
 
 function SideBar({ logout }) {
 
     const navigate = useNavigate()
-
-
-    const svgStyle = "w-6 h-6 stroke-amber-50";
     const liStyle = "cursor-pointer rounded-lg";
+
+
     return (
         <>
-            <aside className='rounded-l-2xl bg-black h-auto flex flex-col justify-around items-center px-5 py-6 text-amber-50 w-18 shadow-xl shadow-blue-900/70'>
-                <div className='flex flex-col gap-3 justify-around items-center'>
-                    {/* <img src="#" alt="logo" /> */}
-                    <Bird className="stroke-blue-500 w-10 h-10" />
+            <aside className=' rounded-l-2xl hidden md:flex h-auto w-20 flex-col justify-between items-center bg-black px-4 py-6 text-amber-50 shadow-2xl shadow-blue-900/50 '>
+                <div className='flex flex-col gap-3 items-center'>
+                <div className="rounded-full bg-white/5 p-2 shadow-inner shadow-blue-900/30">
+                 <Bird className="stroke-blue-400 w-9 h-9" />
+                </div>
 
                     <ul className=' flex flex-col justify-center gap-9 mt-10 mb-20'>
-                        <li
-                            data-tooltip-id="menu-tooltip"
-                            data-tooltip-content="Chats"
-                            >
-                            <NavLink 
-                                to='/'
-                             className={({ isActive }) =>`${liStyle} p-3 flex items-center justify-center ${isActive ? 'bg-gray-500/30' : ''}`}>
-                                <MessageCircle className={svgStyle} />
-                            </NavLink>
-                        </li>
-                        <li
-                            data-tooltip-id="menu-tooltip"
-                            data-tooltip-content="Calls">
+
+                        {
+                            NavItems.map(({id, to, icon, tip }) => (
+                                <li
+                                key={id}
+                                data-tooltip-id="menu-tooltip"
+                                data-tooltip-content= {tip}
+                                >
                                 <NavLink 
-                                to='/calls'
-                                className={({ isActive }) =>`${liStyle} p-3 flex items-center justify-center ${isActive ? 'bg-gray-500/30' : ''}`}>
-                            
-                            <Phone className={svgStyle} />
+                                    to={to}
+                                    className={({ isActive }) =>
+                                        `${liStyle} p-3 flex items-center justify-center rounded-xl transition-all duration-200 ${
+                                          isActive
+                                            ? 'bg-blue-500/20 text-blue-100 ring-2 ring-blue-400/40'
+                                            : 'text-amber-50 hover:bg-white/10 hover:translate-x-0.5'
+                                        }`
+                                      }>
+                                    {icon}
                                 </NavLink>
-                        </li>
-                       <li
-                            data-tooltip-id="menu-tooltip"
-                            data-tooltip-content="Notification">
-                                <NavLink 
-                               to='/notification'
-                                className={({ isActive }) =>`${liStyle} p-3 flex items-center justify-center ${isActive ? 'bg-gray-500/30' : ''}`}>
-                            <Bell className={svgStyle} />
-                                </NavLink>
-                        </li>
-                        <li
-                            data-tooltip-id="menu-tooltip"
-                            data-tooltip-content="Contact">
-                                <NavLink 
-                                to='/contact'
-                                className={({ isActive }) =>`${liStyle} p-3 flex items-center justify-center ${isActive ? 'bg-gray-500/30' : ''}`}>
-                            <Contact className={svgStyle} />
-                                </NavLink>
-                        </li>
-                       <li
-                            data-tooltip-id="menu-tooltip"
-                            data-tooltip-content="Help">
-                                <NavLink 
-                                to='/help'
-                                className={({ isActive }) =>`${liStyle} p-3 flex items-center justify-center ${isActive ? 'bg-gray-500/30' : ''}`}>
-                            <Info className={svgStyle} />
-                                </NavLink>
-                        </li>
+                            </li>
+                            ))}
                     </ul>
                 </div>
 
@@ -71,12 +47,12 @@ function SideBar({ logout }) {
                     <button 
                         data-tooltip-id="menu-tooltip"
                         data-tooltip-content="Setting"
-                        className="cursor-pointer "
+                        className="p-3 rounded-xl hover:bg-white/10 transition-colors duration-200"
                         >
                         <Settings className={svgStyle} /> </button>
                     <button
-                     className="cursor-pointer "
-                     data-tooltip-id="menu-tooltip"
+  className="p-3 rounded-xl hover:bg-red-500/25 transition-colors duration-200"
+  data-tooltip-id="menu-tooltip"
                         data-tooltip-content="Logout"
                         onClick={() => {
                             logout(); 
@@ -92,8 +68,8 @@ function SideBar({ logout }) {
             <Tooltip
                 id="menu-tooltip"
                 place="right"
-                delayShow={1000}
-                className="py-1 px-3 w-fit text-center text-xs rounded-md bg-blue-200 text-blue-900 shadow-2xl z-50"
+                delayShow={600}
+                className="py-1 px-3 w-fit text-center text-xs rounded-md bg-slate-100 text-slate-900 shadow-2xl"
             />
         </>
     )
