@@ -47,12 +47,12 @@ function SideBar({ logout }) {
                     <button 
                         data-tooltip-id="menu-tooltip"
                         data-tooltip-content="Setting"
-                        className="p-3 rounded-xl hover:bg-white/10 transition-colors duration-200"
+                        className="p-3 rounded-xl hover:bg-white/10 transition-colors duration-200 cursor-pointer"
                         >
                         <Settings className={svgStyle} /> </button>
                     <button
-  className="p-3 rounded-xl hover:bg-red-500/25 transition-colors duration-200"
-  data-tooltip-id="menu-tooltip"
+                        className="p-3 rounded-xl hover:bg-red-500/25 transition-colors duration-200 cursor-pointer"
+                        data-tooltip-id="menu-tooltip"
                         data-tooltip-content="Logout"
                         onClick={() => {
                             logout(); 
