@@ -1,25 +1,64 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-    messages: []
+    messagesByChat: {},  // { [chatId]: { items: [], status: 'idle', error: null } }
 }
 
 export const messagesSlice = createSlice({
     name: "messages",
-    initialState: initialState,
+    initialState,
     reducers: {
-        setMessage: (state, action) => {
-            state.messages.push({
-                id: action.payload.id,
-                timestamp: action.payload.timestamp,
-                name: action.payload.name,
-                chat: action.payload.chat,
-                avatar: action.payload.avatar
-            });
+        
+       //set msgs for a specific chat
+       setChatMessages: (state, action) => {
+            const {chatId, messages} = action.payload;
+
+            if (!state.messagesByChat[chatId]) {
+                    state.messagesByChat[chatId] = {items: [], status: 'idle', error: null }
+            }
+            state.messagesByChat[chatId].items = messages || [];
+            state.messagesByChat[chatId].status = "succeeded";
+            state.messagesByChat[chatId].error = null; 
+       },
+
+        //add a single  message to a chat
+        addMessage: (state, action) => {
+            const {chatId, messages} = action.payload;
+
+            if(!state.messagesByChat[chatId]) {
+                state.messagesByChat[chatId] = {items: [], status: 'idle', error: null }
+            }
+            state.messagesByChat[chatId].items.push(messages);
+        },
+
+        //set loading status for a chat
+        setChatMessagesStatus: (state, action) => {
+            const {chatId, status} = action.payload;
+            if (!state.messagesByChat[chatId]) {
+                state.messagesByChat[chatId] = {items: [], status: "idle", error: null}
+            }
+            state.messagesByChat[chatId].status = status;
+        },
+
+        // set error for a chat
+        setChatMessagesError: (state, action) => {
+            const {chatId, error} = action.payload;
+            if (!state.messagesByChat[chatId]) {
+                state.messagesByChat[chatId] = {items: [], status: 'idle', error: null }
+            }
+            state.messagesByChat[chatId].error = error;
+            state.messagesByChat[chatId].status = "failed"
+        },
+
+        // clear msgs for a chat | CleanUp
+        clearChatMessages: (state, action) => {
+            const chatId = action.payload;
+
+            delete state.messagesByChat[chatId];
         }
     }
 });
 
-export const { setMessage } = messagesSlice.actions;
+export const { setChatMessages, addMessage, setChatMessagesStatus, setChatMessagesError, clearChatMessages } = messagesSlice.actions;
 
 export default messagesSlice.reducer;
